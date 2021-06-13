@@ -20,7 +20,9 @@ app.use(morgan('dev'));
 
 // get posts
 app.get('/posts', async (req, res) => {
-	await Post.find().then((posts) => res.status(200).json(posts));
+	await Post.find()
+		.sort('-createdAt')
+		.then((posts) => res.status(200).json(posts));
 });
 
 // create posts
@@ -63,8 +65,21 @@ app.put('/post-update', async (req, res) => {
 	);
 });
 
+app.get('/post/:id', async (req, res) => {
+	console.log(req.params.id);
+
+	const post = await Post.findOne({ _id: req.params.id });
+
+	if (!post) {
+		return res.status(422).json({ message: 'Нет такой статьи' });
+	}
+
+	res.status(200).json(post);
+});
+
 // delete post
 app.delete('/post-delete/:id', async (req, res) => {
+	console.log('id', req.params.id);
 	try {
 		await Post.findOne({ _id: req.params.id }).exec((err, result) => {
 			if (err) return res.status(422).json({ message: `Нет такой статьи ${id}` });
